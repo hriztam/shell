@@ -4,6 +4,8 @@
 #include <unordered_set>
 #include <cstdlib>
 #include <unistd.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 
 using namespace std;
 
@@ -94,6 +96,38 @@ void type(const vector<string> &tokens, const unordered_set<string> &builtins)
   cout << command << ": not found\n";
 }
 
+void runExternalCommand(
+  const string &executable, 
+  vector<string> &tokens) 
+{
+  pid_t child = fork();
+
+  if (child == 0)
+  {
+    vector<char *> arguments;
+
+    for (string &token : tokens)
+      arguments.push_back(&token[0]);
+
+    arguments.push_back(nullptr);
+
+    execv(executable.c_str(), arguments.data());
+
+    perror("execv");
+    exit(1);
+  }
+
+  if (child > 0)
+  {
+    waitpid(child, nullptr, 0);
+  }
+  else
+  {
+    perror("fork");
+  }
+
+}
+
 int main(int argc, char *argv[])
 {
   // Flush after every std::cout / std:cerr
@@ -119,7 +153,17 @@ int main(int argc, char *argv[])
       type(tokens, builtins);
     else
     {
-      cout << command << ": command not found" << endl;
+      string executable = findExecutable(first_token);
+
+      if (executable.empty())
+      {
+        cout << command << ": command not found" << endl;
+        continue;
+      }
+
+      runExternalCommand(executable, tokens);
+      
+      
     }
   }
   return 0;
