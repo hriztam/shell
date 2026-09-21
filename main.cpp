@@ -84,6 +84,36 @@ void pwd()
   
 }
 
+void cd(const std::vector<std::string> &tokens)
+{
+  if (tokens.size() != 2)
+  {
+    std::cout << "cd: expected a path\n";
+    return;
+  }
+
+  std::string directory = tokens[1];
+
+  if (directory == "~")
+  {
+    const char *homeDirectory = getenv("HOME");
+
+    if (homeDirectory == nullptr)
+    {
+      std::cout << "cd: HOME not set\n";
+      return;
+    }
+
+    directory = homeDirectory;
+  }
+
+  if (chdir(directory.c_str()) != 0)
+  {
+    std::cout << "cd: " << directory
+              << ": No such file or directory\n";
+  }
+}
+
 void type(const std::vector<std::string> &tokens, const std::unordered_set<std::string> &builtins)
 {
   if (tokens.size() == 1)
@@ -146,7 +176,7 @@ int main(int argc, char *argv[])
   // Flush after every std::cout / std:cerr
   std::cout << std::unitbuf;
   std::cerr << std::unitbuf;
-  const std::unordered_set<std::string> builtins = {"exit", "echo", "type", "pwd"};
+  const std::unordered_set<std::string> builtins = {"exit", "echo", "type", "pwd", "cd"};
 
   while (true)
   {
@@ -164,6 +194,8 @@ int main(int argc, char *argv[])
       echo(command);
     else if (first_token == "pwd")
       pwd();
+    else if (first_token == "cd")
+      cd(tokens);
     else if (first_token == "type")
       type(tokens, builtins);
     else
@@ -177,8 +209,6 @@ int main(int argc, char *argv[])
       }
 
       runExternalCommand(executable, tokens);
-      
-      
     }
   }
   return 0;

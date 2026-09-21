@@ -10,6 +10,9 @@ Making a shell in c++ in scratch to get better knowledge on how they work
 - Can run external commands
 - Added pwd command
 
+- Added Change directory (cd) command
+
 ### Next steps
 
-- Add Change directory (cd) command
+- Quoting
+- Redirection
