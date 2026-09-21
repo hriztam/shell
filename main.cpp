@@ -8,12 +8,10 @@
 #include <sys/wait.h>
 #include <limits.h>
 
-using namespace std;
-
-vector<string> tokenize(const string &command)
+std::vector<std::string> tokenize(const std::string &command)
 {
-  vector<string> tokens;
-  string token;
+  std::vector<std::string> tokens;
+  std::string token;
 
   for (char character : command)
   {
@@ -37,28 +35,28 @@ vector<string> tokenize(const string &command)
   return tokens;
 }
 
-string findExecutable(const string &command)
+std::string findExecutable(const std::string &command)
 {
   const char *pathEnvironment = getenv("PATH");
   if (pathEnvironment == nullptr)
     return "";
 
-  string path = pathEnvironment;
-  size_t start = 0;
+  std::string path = pathEnvironment;
+  std::size_t start = 0;
 
   while (start <= path.size())
   {
-    size_t end = path.find(':', start);
-    string directory = path.substr(start, end == string::npos ? end : end - start);
+    std::size_t end = path.find(':', start);
+    std::string directory = path.substr(start, end == std::string::npos ? end : end - start);
 
     if (directory.empty())
       directory = ".";
 
-    string candidate = directory + '/' + command;
+    std::string candidate = directory + '/' + command;
     if (access(candidate.c_str(), X_OK) == 0)
       return candidate;
 
-    if (end == string::npos)
+    if (end == std::string::npos)
       break;
 
     start = end + 1;
@@ -67,9 +65,9 @@ string findExecutable(const string &command)
   return "";
 }
 
-void echo(const string &command)
+void echo(const std::string &command)
 {
-  cout << command.substr(5) << endl;
+  std::cout << command.substr(5) << std::endl;
 }
 
 void pwd()
@@ -82,46 +80,46 @@ void pwd()
     return;
   }
 
-  cout << currentDirectory << endl;
+  std::cout << currentDirectory << std::endl;
   
 }
 
-void type(const vector<string> &tokens, const unordered_set<string> &builtins)
+void type(const std::vector<std::string> &tokens, const std::unordered_set<std::string> &builtins)
 {
   if (tokens.size() == 1)
   {
-    cout << "invalid syntax for this command\n";
+    std::cout << "invalid syntax for this command\n";
     return;
   }
 
-  const string &command = tokens[1];
+  const std::string &command = tokens[1];
   if (builtins.find(command) != builtins.end())
   {
-    cout << command << " is a shell builtin\n";
+    std::cout << command << " is a shell builtin\n";
     return;
   }
 
-  string executable = findExecutable(command);
+  std::string executable = findExecutable(command);
   if (!executable.empty())
   {
-    cout << command << " is " << executable << endl;
+    std::cout << command << " is " << executable << std::endl;
     return;
   }
 
-  cout << command << ": not found\n";
+  std::cout << command << ": not found\n";
 }
 
 void runExternalCommand(
-  const string &executable, 
-  vector<string> &tokens) 
+  const std::string &executable,
+  std::vector<std::string> &tokens)
 {
   pid_t child = fork();
 
   if (child == 0)
   {
-    vector<char *> arguments;
+    std::vector<char *> arguments;
 
-    for (string &token : tokens)
+    for (std::string &token : tokens)
       arguments.push_back(&token[0]);
 
     arguments.push_back(nullptr);
@@ -148,17 +146,17 @@ int main(int argc, char *argv[])
   // Flush after every std::cout / std:cerr
   std::cout << std::unitbuf;
   std::cerr << std::unitbuf;
-  const unordered_set<string> builtins = {"exit", "echo", "type", "pwd"};
+  const std::unordered_set<std::string> builtins = {"exit", "echo", "type", "pwd"};
 
   while (true)
   {
     std::cout << "$ ";
-    string command;
+    std::string command;
     getline(std::cin, command);
     if (command == "exit")
       break;
-    vector<string> tokens = tokenize(command);
-    string first_token;
+    std::vector<std::string> tokens = tokenize(command);
+    std::string first_token;
     if (!tokens.empty())
       first_token = tokens[0];
 
@@ -170,11 +168,11 @@ int main(int argc, char *argv[])
       type(tokens, builtins);
     else
     {
-      string executable = findExecutable(first_token);
+      std::string executable = findExecutable(first_token);
 
       if (executable.empty())
       {
-        cout << command << ": command not found" << endl;
+        std::cout << command << ": command not found" << std::endl;
         continue;
       }
 
