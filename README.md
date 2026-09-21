@@ -7,3 +7,4 @@ Making a shell in c++ in scratch to get better knowledge on how they work
 - Have a basic REPL loop
 - Basic inbuilt commands like exit, type, echo
 - Can find executable files
+- Can run external commands
