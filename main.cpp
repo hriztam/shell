@@ -6,6 +6,7 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <limits.h>
 
 using namespace std;
 
@@ -71,6 +72,20 @@ void echo(const string &command)
   cout << command.substr(5) << endl;
 }
 
+void pwd()
+{
+  char currentDirectory[PATH_MAX];
+
+  if (getcwd(currentDirectory, sizeof(currentDirectory)) == nullptr)
+  {
+    perror("pwd");
+    return;
+  }
+
+  cout << currentDirectory << endl;
+  
+}
+
 void type(const vector<string> &tokens, const unordered_set<string> &builtins)
 {
   if (tokens.size() == 1)
@@ -133,7 +148,7 @@ int main(int argc, char *argv[])
   // Flush after every std::cout / std:cerr
   std::cout << std::unitbuf;
   std::cerr << std::unitbuf;
-  const unordered_set<string> builtins = {"exit", "echo", "type"};
+  const unordered_set<string> builtins = {"exit", "echo", "type", "pwd"};
 
   while (true)
   {
@@ -149,6 +164,8 @@ int main(int argc, char *argv[])
 
     if (first_token == "echo")
       echo(command);
+    else if (first_token == "pwd")
+      pwd();
     else if (first_token == "type")
       type(tokens, builtins);
     else
